@@ -5,26 +5,31 @@ const jwt = require("jsonwebtoken");
 // function to check if username and email already exists
 exports.saveUser = async (req, res, next) => {
   try {
+    const { username, email } = req.body;
+    if (!(username && email)) {
+      return res.status(400).json({ message: "all fields are required!" });
+    }
+
     const usernameExist = await UserModel.findOne({
       where: {
-        username: req.body.username,
+        username: username,
       },
     });
 
     if (usernameExist) {
       return res.status(409).json({
-        error: "username already taken!",
+        message: "username already taken!",
       });
     }
 
     const emailExist = await UserModel.findOne({
       where: {
-        email: req.body.email,
+        email: email,
       },
     });
 
     if (emailExist) {
-      return res.status(409).json({ error: "email already exists!" });
+      return res.status(409).json({ message: "email already exists!" });
     }
 
     next();
@@ -44,7 +49,6 @@ exports.authorizeUser = async (req, res, next) => {
 
     // verify token
     const jwtObj = jwt.verify(token, process.env.JWTSECRETKEY);
-    console.log("jwt decoded obj", jwtObj);
     req.user = jwtObj?.userId;
     next();
   } catch (err) {

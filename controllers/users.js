@@ -7,8 +7,13 @@ const jwt = require("jsonwebtoken");
 exports.registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
     // encrypt the password
     const encryptedPassword = await bcrypt.hash(password, 10);
+
+    if (!(username && email && password)) {
+      return res.status(400).json({ message: "all fields are required!" });
+    }
 
     const userData = {
       username,
@@ -20,14 +25,14 @@ exports.registerUser = async (req, res) => {
     const user = await UserModel.create(userData);
 
     if (!user) {
-      res.status(500).send("Something Went wrong!");
+      res.status(400).send("Couldn't Create User!");
     }
     // create a jsonwebtoken
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWTSECRETKEY, // secret key
       {
-        expiresIn: "2h",
+        expiresIn: "1h",
       }
     );
 
@@ -59,6 +64,7 @@ exports.loginUser = async (req, res, next) => {
   try {
     // get request body
     const { email, password } = req.body;
+
     // find user in db
     const user = await UserModel.findOne({
       where: {
