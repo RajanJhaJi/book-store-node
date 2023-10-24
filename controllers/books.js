@@ -58,7 +58,7 @@ exports.addBook = async (req, res) => {
     // get the req body
     const bookObj = req.body;
     const book = await BookModel.create(bookObj);
-    return res.status(201).json({ message: "Book Created", bookId: book.id });
+    return res.status(201).json({ message: "Book Added!", bookId: book.id });
   } catch (err) {
     return res.status(500).json({ error: "Something Went Wrong: " + err });
   }
